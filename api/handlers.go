@@ -1,0 +1,161 @@
+package api
+
+import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strconv"
+
+	"github.com/R894/go-blog/models"
+	"github.com/R894/go-blog/utils"
+	"github.com/julienschmidt/httprouter"
+)
+
+func (s *Server) home(w http.ResponseWriter, r *http.Request) {
+
+	if r.URL.Path != "/" {
+		s.notFound(w)
+		return
+	}
+	utils.SendApiMessage(w, http.StatusOK, "Hi")
+}
+
+func (s *Server) viewPostById(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil || id < 1 {
+		fmt.Println(err)
+		s.notFound(w)
+		return
+	}
+	post, err := s.db.GetPostById(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			s.notFound(w)
+			return
+		}
+		s.clientError(w, http.StatusInternalServerError)
+		return
+	}
+
+	if post == nil {
+		s.notFound(w)
+		return
+	}
+	utils.WriteJSON(w, http.StatusOK, post)
+}
+
+func (s *Server) createPost(w http.ResponseWriter, r *http.Request) {
+	var newPost models.NewPostRequest
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&newPost); err != nil {
+		s.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	token, err := utils.GetBearerHeader(r)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	userId, err := utils.GetUserIdFromJWT(token)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	newPost.UserId = userId
+
+	id, err := s.db.CreatePost(newPost)
+
+	if err != nil {
+		s.clientError(w, http.StatusBadRequest)
+		return
+	}
+	utils.SendApiMessage(w, http.StatusCreated, strconv.Itoa(id))
+}
+
+func (s *Server) viewCommentsByPostId(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	comment, err := s.db.GetCommentsByPostId(id)
+	if err != nil {
+		s.clientError(w, http.StatusNotFound)
+		return
+	}
+	utils.WriteJSON(w, http.StatusOK, comment)
+}
+
+func (s *Server) createComment(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil || id < 1 {
+		s.notFound(w)
+		return
+	}
+
+	var newComment models.CreateCommentRequest
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&newComment); err != nil {
+		s.clientError(w, http.StatusBadRequest)
+		return
+	}
+	newComment.PostId = id
+	err = s.db.CreateComment(newComment)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	utils.WriteJSON(w, http.StatusCreated, "New comment created")
+}
+
+func (s *Server) viewPosts(w http.ResponseWriter, r *http.Request) {
+	posts, err := s.db.GetPosts()
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	utils.WriteJSON(w, http.StatusOK, posts)
+}
+
+func (s *Server) login(w http.ResponseWriter, r *http.Request) {
+	var loginRequest models.LoginRequest
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&loginRequest); err != nil {
+		s.clientError(w, http.StatusBadRequest)
+		return
+	}
+	id, err := s.db.AuthenticateUser(loginRequest.Username, loginRequest.Password)
+	if err != nil {
+		s.clientError(w, http.StatusUnauthorized)
+		return
+	}
+	token, err := utils.CreateJWT(id)
+	if err != nil {
+		s.clientError(w, http.StatusUnauthorized)
+	}
+	utils.SendApiMessage(w, http.StatusOK, token)
+}
+
+func (s *Server) register(w http.ResponseWriter, r *http.Request) {
+	var newUser models.CreateUserRequest
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&newUser); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	fmt.Println(newUser)
+	id, err := s.db.CreateUser(newUser)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	jwt, _ := utils.CreateJWT(id)
+	fmt.Println(jwt)
+	utils.SendApiMessage(w, http.StatusOK, "User created successfully")
+}
