@@ -92,7 +92,7 @@ func (d *PostgresDatabase) CreatePost(p NewPostRequest) (int, error) {
 
 func (d *PostgresDatabase) UpdatePostById(id int, req UpdatePostRequest) error {
 	query := `UPDATE posts SET title = $1, content = $2 WHERE id = $3`
-	_, err := d.db.Exec(query, req.Title, req.Content, req.UserId)
+	_, err := d.db.Exec(query, req.Title, req.Content, id)
 
 	if err != nil {
 		return err
