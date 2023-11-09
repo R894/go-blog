@@ -8,14 +8,20 @@ import (
 type Post struct {
 	ID        int       `json:"id"`
 	Title     string    `json:"title"`
-	UserId    int       `json:"userId"`
+	UserId    int       `json:"-"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
 type NewPostRequest struct {
 	Title   string `json:"title"`
-	UserId  int    `json:"userId"`
+	UserId  int    `json:"-"`
+	Content string `json:"content"`
+}
+
+type UpdatePostRequest struct {
+	Title   string `json:"title"`
+	UserId  int    `json:"-"`
 	Content string `json:"content"`
 }
 
@@ -77,4 +83,23 @@ func (d *PostgresDatabase) CreatePost(p NewPostRequest) (int, error) {
 		return 0, err
 	}
 	return postID, nil
+}
+
+func (d *PostgresDatabase) UpdatePostById(id int, req UpdatePostRequest) error {
+	query := `UPDATE posts SET title = $1, content = $2 WHERE id = $3`
+	_, err := d.db.Exec(query, req.Title, req.Content, req.UserId)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *PostgresDatabase) DeletePostById(id int) error {
+	query := `DELETE FROM posts WHERE id = $1`
+	_, err := d.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

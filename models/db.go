@@ -2,23 +2,34 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
 
 	_ "github.com/lib/pq"
 )
 
 type Database interface {
+	// Initialize tables
 	CreateUsersTable() error
 	CreatePostsTable() error
 	CreateCommentsTable() error
-	CreateUser(CreateUserRequest) (int, error)
-	GetUsers() ([]*User, error)
-	GetUserById(int) (*User, error)
-	AuthenticateUser(string, string) (int, error)
+
+	// Posts
 	CreatePost(NewPostRequest) (int, error)
 	GetPosts() ([]*Post, error)
 	GetPostById(int) (*Post, error)
+	UpdatePostById(int, UpdatePostRequest) error
+	DeletePostById(int) error
+
+	// Comments
 	CreateComment(CreateCommentRequest) error
 	GetCommentsByPostId(int) ([]*Comment, error)
+
+	// User related
+	CreateUser(CreateUserRequest) (int, error)
+	AuthenticateUser(string, string) (int, error)
+	GetUsers() ([]*User, error)
+	GetUserById(int) (*User, error)
 }
 
 type PostgresDatabase struct {
@@ -26,7 +37,9 @@ type PostgresDatabase struct {
 }
 
 func NewPostgresDatabase() (*PostgresDatabase, error) {
-	connStr := "user=postgres dbname=blog password=postgres sslmode=disable"
+	dbUser, dbPassword, dbName := os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME")
+
+	connStr := fmt.Sprintf("user=%s dbname=%s password=%s sslmode=disable", dbUser, dbName, dbPassword)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
