@@ -16,8 +16,8 @@ func (s *Server) routes() http.Handler {
 	mux.HandlerFunc(http.MethodGet, "/posts", s.viewPosts)
 	mux.Handler(http.MethodPost, "/posts", protected.ThenFunc(s.createPost))
 	mux.HandlerFunc(http.MethodGet, "/posts/:id", s.viewPostById)
-	mux.Handler(http.MethodDelete, "/posts", protected.ThenFunc(s.deletePost))
-	mux.Handler(http.MethodPut, "/posts", protected.ThenFunc(s.updatePost))
+	mux.Handler(http.MethodDelete, "/posts/:id", protected.ThenFunc(s.deletePost))
+	mux.Handler(http.MethodPut, "/posts/:id", protected.ThenFunc(s.updatePost))
 
 	// Comments
 	mux.HandlerFunc(http.MethodGet, "/comments/:id", s.viewCommentsByPostId)

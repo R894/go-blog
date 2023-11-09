@@ -25,7 +25,6 @@ func (s *Server) viewPostById(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
 	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil || id < 1 {
-		fmt.Println(err)
 		s.notFound(w)
 		return
 	}
@@ -136,7 +135,11 @@ func (s *Server) deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userId, _ := utils.GetUserIdFromJWT(token)
-	postUserId, _ := s.db.GetPostById(id)
+	postUserId, err := s.db.GetPostById(id)
+	if err != nil {
+		s.clientError(w, http.StatusNotFound)
+		return
+	}
 
 	if postUserId.UserId != userId {
 		s.clientError(w, http.StatusForbidden)
