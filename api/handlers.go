@@ -122,6 +122,72 @@ func (s *Server) viewPosts(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, posts)
 }
 
+func (s *Server) deletePost(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil || id < 1 {
+		s.notFound(w)
+		return
+	}
+
+	token, err := utils.GetBearerHeader(r)
+	if err != nil {
+		s.clientError(w, http.StatusForbidden)
+		return
+	}
+	userId, _ := utils.GetUserIdFromJWT(token)
+	postUserId, _ := s.db.GetPostById(id)
+
+	if postUserId.UserId != userId {
+		s.clientError(w, http.StatusForbidden)
+		return
+	}
+
+	err = s.db.DeletePostById(id)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+
+	utils.SendApiMessage(w, http.StatusOK, "Post deleted successfully")
+}
+
+func (s *Server) updatePost(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil || id < 1 {
+		s.notFound(w)
+		return
+	}
+
+	token, err := utils.GetBearerHeader(r)
+	if err != nil {
+		s.clientError(w, http.StatusForbidden)
+		return
+	}
+	userId, _ := utils.GetUserIdFromJWT(token)
+	postUserId, _ := s.db.GetPostById(id)
+
+	if postUserId.UserId != userId {
+		s.clientError(w, http.StatusForbidden)
+		return
+	}
+
+	var updatePost models.UpdatePostRequest
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&updatePost); err != nil {
+		s.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = s.db.UpdatePostById(id, updatePost)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	utils.SendApiMessage(w, http.StatusOK, "Post updated successfully")
+}
+
 func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	var loginRequest models.LoginRequest
 	decoder := json.NewDecoder(r.Body)

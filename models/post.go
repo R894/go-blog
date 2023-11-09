@@ -25,6 +25,11 @@ type UpdatePostRequest struct {
 	Content string `json:"content"`
 }
 
+type DeletePostRequest struct {
+	PostId int `json:"postId"`
+	UserId int `json:"-"`
+}
+
 func (d *PostgresDatabase) GetPosts() ([]*Post, error) {
 	query := `SELECT * FROM posts`
 	rows, err := d.db.Query(query)
