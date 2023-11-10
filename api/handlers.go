@@ -104,6 +104,19 @@ func (s *Server) createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	newComment.PostId = id
+
+	token, err := utils.GetBearerHeader(r)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	userId, err := utils.GetUserIdFromJWT(token)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	newComment.UserId = userId
+
 	err = s.db.CreateComment(newComment)
 	if err != nil {
 		s.serverError(w, r, err)

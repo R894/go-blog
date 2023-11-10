@@ -6,14 +6,14 @@ type Comment struct {
 	ID        string    `json:"id"`
 	PostId    int       `json:"post"`
 	Content   string    `json:"content"`
-	UserId    int       `json:"user"`
+	UserId    int       `json:"userId"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
 type CreateCommentRequest struct {
 	PostId  int    `json:"post"`
 	Content string `json:"content"`
-	UserId  int    `json:"user"`
+	UserId  int    `json:"userId"`
 }
 
 func (d *PostgresDatabase) GetCommentsByPostId(id int) ([]*Comment, error) {

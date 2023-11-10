@@ -27,7 +27,7 @@ func (s *Server) routes() http.Handler {
 	mux.HandlerFunc(http.MethodPost, "/login", s.login)
 	mux.HandlerFunc(http.MethodPost, "/register", s.register)
 
-	standard := alice.New(s.logRequest)
+	standard := alice.New(s.logRequest, s.secureHeaders)
 
 	return standard.Then(mux)
 }
