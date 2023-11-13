@@ -13,6 +13,7 @@ func (s *Server) routes() http.Handler {
 	protected := alice.New(s.withJWTAuth)
 
 	// Posts
+	mux.HandlerFunc(http.MethodGet, "/posts", s.viewPosts)
 	mux.HandlerFunc(http.MethodGet, "/posts/page/:page", s.viewPosts)
 	mux.HandlerFunc(http.MethodGet, "/posts/view/:id", s.viewPostById)
 	mux.Handler(http.MethodDelete, "/posts/delete/:id", protected.ThenFunc(s.deletePost))
