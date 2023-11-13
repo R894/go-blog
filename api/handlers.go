@@ -126,12 +126,28 @@ func (s *Server) createComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) viewPosts(w http.ResponseWriter, r *http.Request) {
-	posts, err := s.db.GetPosts()
+	params := httprouter.ParamsFromContext(r.Context())
+	page, err := strconv.Atoi(params.ByName("page"))
+	if err != nil {
+		s.notFound(w)
+		return
+	}
+	if page < 0 {
+		page = 0
+	}
+
+	posts, totalPages, err := s.db.GetPosts(6, 6*(page-1))
 	if err != nil {
 		s.serverError(w, r, err)
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, posts)
+
+	// Return a response containing the total pages
+	response := map[string]any{
+		"posts":      posts,
+		"totalPages": totalPages,
+	}
+	utils.WriteJSON(w, http.StatusOK, response)
 }
 
 func (s *Server) deletePost(w http.ResponseWriter, r *http.Request) {
@@ -211,6 +227,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		s.clientError(w, http.StatusBadRequest)
 		return
 	}
+
 	id, err := s.db.AuthenticateUser(loginRequest.Username, loginRequest.Password)
 	if err != nil {
 		s.clientError(w, http.StatusUnauthorized)

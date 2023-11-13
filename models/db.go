@@ -16,7 +16,7 @@ type Database interface {
 
 	// Posts
 	CreatePost(NewPostRequest) (int, error)
-	GetPosts() ([]*Post, error)
+	GetPosts(limit, offset int) ([]*Post, int, error)
 	GetPostById(int) (*Post, error)
 	UpdatePostById(int, UpdatePostRequest) error
 	DeletePostById(int) error

@@ -30,11 +30,21 @@ type DeletePostRequest struct {
 	UserId int `json:"-"`
 }
 
-func (d *PostgresDatabase) GetPosts() ([]*Post, error) {
-	query := `SELECT * FROM posts`
-	rows, err := d.db.Query(query)
+func (d *PostgresDatabase) GetPosts(limit, offset int) ([]*Post, int, error) {
+	totalQuery := `SELECT COUNT(*) FROM posts`
+	var totalCount int
+	err := d.db.QueryRow(totalQuery).Scan(&totalCount)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+
+	// Calculate total pages
+	totalPages := (totalCount + limit - 1) / limit
+
+	query := `SELECT * FROM posts LIMIT $1 OFFSET $2`
+	rows, err := d.db.Query(query, limit, offset)
+	if err != nil {
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -48,11 +58,11 @@ func (d *PostgresDatabase) GetPosts() ([]*Post, error) {
 			&post.UserId,
 			&post.CreatedAt)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		posts = append(posts, post)
 	}
-	return posts, nil
+	return posts, totalPages, nil
 }
 
 func (d *PostgresDatabase) GetPostById(id int) (*Post, error) {

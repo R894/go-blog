@@ -13,11 +13,12 @@ func (s *Server) routes() http.Handler {
 	protected := alice.New(s.withJWTAuth)
 
 	// Posts
-	mux.HandlerFunc(http.MethodGet, "/posts", s.viewPosts)
+	mux.HandlerFunc(http.MethodGet, "/posts/:page", s.viewPosts)
 	mux.Handler(http.MethodPost, "/posts", protected.ThenFunc(s.createPost))
-	mux.HandlerFunc(http.MethodGet, "/posts/:id", s.viewPostById)
-	mux.Handler(http.MethodDelete, "/posts/:id", protected.ThenFunc(s.deletePost))
-	mux.Handler(http.MethodPut, "/posts/:id", protected.ThenFunc(s.updatePost))
+
+	mux.HandlerFunc(http.MethodGet, "/post/:id", s.viewPostById)
+	mux.Handler(http.MethodDelete, "/post/:id", protected.ThenFunc(s.deletePost))
+	mux.Handler(http.MethodPut, "/post/:id", protected.ThenFunc(s.updatePost))
 
 	// Comments
 	mux.HandlerFunc(http.MethodGet, "/comments/:id", s.viewCommentsByPostId)
