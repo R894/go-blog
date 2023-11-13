@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"math"
 	"time"
 )
 
@@ -39,7 +40,7 @@ func (d *PostgresDatabase) GetPosts(limit, offset int) ([]*Post, int, error) {
 	}
 
 	// Calculate total pages
-	totalPages := (totalCount + limit - 1) / limit
+	totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
 
 	query := `SELECT * FROM posts LIMIT $1 OFFSET $2`
 	rows, err := d.db.Query(query, limit, offset)

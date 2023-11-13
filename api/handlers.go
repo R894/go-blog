@@ -127,16 +127,19 @@ func (s *Server) createComment(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) viewPosts(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
+	limit := 6
 	page, err := strconv.Atoi(params.ByName("page"))
-	if err != nil {
-		s.notFound(w)
-		return
-	}
-	if page < 0 {
-		page = 0
+	if err != nil || page < 1 {
+		page = 1
 	}
 
-	posts, totalPages, err := s.db.GetPosts(6, 6*(page-1))
+	offset := (page - 1) * limit
+	if offset < 0 {
+		offset = 0
+	}
+	fmt.Println(offset)
+
+	posts, totalPages, err := s.db.GetPosts(6, offset)
 	if err != nil {
 		s.serverError(w, r, err)
 		return
