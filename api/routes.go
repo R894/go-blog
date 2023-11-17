@@ -13,6 +13,9 @@ func (s *Server) routes() http.Handler {
 	handler := handlers.NewHandlers(s)
 	protected := alice.New(s.withJWTAuth)
 
+	// Define file server folder
+	dir := "./static"
+
 	// Posts
 	mux.HandlerFunc(http.MethodGet, "/posts", handler.ViewPosts)
 	mux.HandlerFunc(http.MethodGet, "/posts/page/:page", handler.ViewPosts)
@@ -28,6 +31,10 @@ func (s *Server) routes() http.Handler {
 	// Authentication
 	mux.HandlerFunc(http.MethodPost, "/login", handler.Login)
 	mux.HandlerFunc(http.MethodPost, "/register", handler.Register)
+
+	// File Server
+	mux.ServeFiles("/static/*filepath", http.Dir(dir))
+	mux.HandlerFunc(http.MethodPost, "/upload", handler.Upload)
 
 	standard := alice.New(s.logRequest, s.secureHeaders)
 

@@ -11,6 +11,7 @@ type Post struct {
 	Title     string    `json:"title"`
 	UserId    int       `json:"userId"`
 	Content   string    `json:"content"`
+	File      string    `json:"file"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 

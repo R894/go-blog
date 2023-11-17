@@ -1,6 +1,8 @@
 package handlers
 
-import "github.com/R894/go-blog/api/interfaces"
+import (
+	"github.com/R894/go-blog/api/interfaces"
+)
 
 type Handlers struct {
 	server interfaces.ServerInterface
