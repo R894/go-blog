@@ -3,30 +3,31 @@ package api
 import (
 	"net/http"
 
+	"github.com/R894/go-blog/api/handlers"
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
 )
 
 func (s *Server) routes() http.Handler {
 	mux := httprouter.New()
-	mux.HandlerFunc(http.MethodGet, "/", s.home)
+	handler := handlers.NewHandlers(s)
 	protected := alice.New(s.withJWTAuth)
 
 	// Posts
-	mux.HandlerFunc(http.MethodGet, "/posts", s.viewPosts)
-	mux.HandlerFunc(http.MethodGet, "/posts/page/:page", s.viewPosts)
-	mux.HandlerFunc(http.MethodGet, "/posts/view/:id", s.viewPostById)
-	mux.Handler(http.MethodDelete, "/posts/delete/:id", protected.ThenFunc(s.deletePost))
-	mux.Handler(http.MethodPut, "/posts/update/:id", protected.ThenFunc(s.updatePost))
-	mux.Handler(http.MethodPost, "/posts", protected.ThenFunc(s.createPost))
+	mux.HandlerFunc(http.MethodGet, "/posts", handler.ViewPosts)
+	mux.HandlerFunc(http.MethodGet, "/posts/page/:page", handler.ViewPosts)
+	mux.HandlerFunc(http.MethodGet, "/posts/view/:id", handler.ViewPostById)
+	mux.Handler(http.MethodDelete, "/posts/delete/:id", protected.ThenFunc(handler.DeletePost))
+	mux.Handler(http.MethodPut, "/posts/update/:id", protected.ThenFunc(handler.UpdatePost))
+	mux.Handler(http.MethodPost, "/posts", protected.ThenFunc(handler.CreatePost))
 
 	// Comments
-	mux.HandlerFunc(http.MethodGet, "/comments/post/:id", s.viewCommentsByPostId)
-	mux.Handler(http.MethodPost, "/comments/post/:id", protected.ThenFunc(s.createComment))
+	mux.HandlerFunc(http.MethodGet, "/comments/post/:id", handler.ViewCommentsByPostId)
+	mux.Handler(http.MethodPost, "/comments/post/:id", protected.ThenFunc(handler.CreateComment))
 
 	// Authentication
-	mux.HandlerFunc(http.MethodPost, "/login", s.login)
-	mux.HandlerFunc(http.MethodPost, "/register", s.register)
+	mux.HandlerFunc(http.MethodPost, "/login", handler.Login)
+	mux.HandlerFunc(http.MethodPost, "/register", handler.Register)
 
 	standard := alice.New(s.logRequest, s.secureHeaders)
 

@@ -23,7 +23,7 @@ func (s *Server) withJWTAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString, err := utils.GetBearerHeader(r)
 		if err != nil {
-			s.clientError(w, http.StatusUnauthorized)
+			s.ClientError(w, http.StatusUnauthorized)
 			return
 		}
 
