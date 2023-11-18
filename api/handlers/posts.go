@@ -38,8 +38,10 @@ func (s *Handlers) ViewPostById(w http.ResponseWriter, r *http.Request) {
 
 func (s *Handlers) CreatePost(w http.ResponseWriter, r *http.Request) {
 	var newPost models.NewPostRequest
+	// decode JSON request and put it into newPost
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&newPost); err != nil {
+		fmt.Println(err)
 		s.server.ClientError(w, http.StatusBadRequest)
 		return
 	}
@@ -49,6 +51,8 @@ func (s *Handlers) CreatePost(w http.ResponseWriter, r *http.Request) {
 		s.server.ServerError(w, r, err)
 		return
 	}
+
+	// get userId from jwt then add it to the new post request
 	userId, err := utils.GetUserIdFromJWT(token)
 	if err != nil {
 		s.server.ServerError(w, r, err)
@@ -59,6 +63,7 @@ func (s *Handlers) CreatePost(w http.ResponseWriter, r *http.Request) {
 	id, err := s.server.GetDB().CreatePost(newPost)
 
 	if err != nil {
+		fmt.Println(err)
 		s.server.ClientError(w, http.StatusBadRequest)
 		return
 	}

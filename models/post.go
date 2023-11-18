@@ -11,14 +11,15 @@ type Post struct {
 	Title     string    `json:"title"`
 	UserId    int       `json:"userId"`
 	Content   string    `json:"content"`
-	File      string    `json:"file"`
+	FilePath  string    `json:"imagePath"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
 type NewPostRequest struct {
-	Title   string `json:"title"`
-	UserId  int    `json:"-"`
-	Content string `json:"content"`
+	Title    string `json:"title"`
+	UserId   int    `json:"-"`
+	Content  string `json:"content"`
+	FilePath string `json:"-"`
 }
 
 type UpdatePostRequest struct {
@@ -58,6 +59,7 @@ func (d *PostgresDatabase) GetPosts(limit, offset int) ([]*Post, int, error) {
 			&post.Title,
 			&post.Content,
 			&post.UserId,
+			&post.FilePath,
 			&post.CreatedAt)
 		if err != nil {
 			return nil, 0, err

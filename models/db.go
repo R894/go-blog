@@ -68,10 +68,10 @@ func NewPostgresDatabase() (*PostgresDatabase, error) {
 func (d *PostgresDatabase) CreateUsersTable() error {
 	query := `CREATE TABLE IF NOT EXISTS users (
 		id SERIAL PRIMARY KEY,
-		username VARCHAR(255) UNIQUE,
-		first_name VARCHAR(255),
-		last_name VARCHAR(255),
-		hashed_password VARCHAR(255),
+		username VARCHAR(255) UNIQUE NOT NULL,
+		first_name VARCHAR(255) NOT NULL,
+		last_name VARCHAR(255) NOT NULL,
+		hashed_password VARCHAR(255) NOT NULL,
 		created timestamp default current_timestamp
 	)`
 	_, err := d.db.Exec(query)
@@ -81,9 +81,10 @@ func (d *PostgresDatabase) CreateUsersTable() error {
 func (d *PostgresDatabase) CreatePostsTable() error {
 	query := `CREATE TABLE IF NOT EXISTS posts (
         id SERIAL PRIMARY KEY,
-        title VARCHAR(255),
-        content TEXT,
-        user_id INT,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        user_id INT NOT NULL,
+		logo_path VARCHAR(255) DEFAULT 'none',
         created TIMESTAMP DEFAULT current_timestamp
     )`
 	_, err := d.db.Exec(query)
@@ -93,9 +94,9 @@ func (d *PostgresDatabase) CreatePostsTable() error {
 func (d *PostgresDatabase) CreateCommentsTable() error {
 	query := `CREATE TABLE IF NOT EXISTS comments (
         id SERIAL PRIMARY KEY,
-        post_id INT,
-        content TEXT,
-        user_id INT,
+        post_id INT NOT NULL,
+        content TEXT NOT NULL,
+        user_id INT NOT NULL,
         created TIMESTAMP DEFAULT current_timestamp
     )`
 	_, err := d.db.Exec(query)

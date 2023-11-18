@@ -41,6 +41,6 @@ func (s *Handlers) Upload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error copying file data", http.StatusInternalServerError)
 		return
 	}
-	utils.SendApiMessage(w, http.StatusCreated, "File "+randomFileName+" created")
+	utils.SendApiMessage(w, http.StatusCreated, randomFileName+fileExt)
 
 }
