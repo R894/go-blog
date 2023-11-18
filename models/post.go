@@ -79,6 +79,7 @@ func (d *PostgresDatabase) GetPostById(id int) (*Post, error) {
 		&post.Title,
 		&post.Content,
 		&post.UserId,
+		&post.FilePath,
 		&post.CreatedAt)
 	if err != nil {
 		return nil, err
