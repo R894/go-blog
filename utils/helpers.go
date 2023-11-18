@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type Message struct {
@@ -36,4 +38,9 @@ func GetBearerHeader(r *http.Request) (string, error) {
 		return "", errors.New("Unauthorized")
 	}
 	return strings.TrimPrefix(tokenString, "Bearer "), nil
+}
+
+func GenerateRandomFileName() string {
+	timestamp := strconv.FormatInt(time.Now().UTC().Unix(), 10)
+	return timestamp
 }
