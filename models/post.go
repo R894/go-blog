@@ -19,7 +19,7 @@ type NewPostRequest struct {
 	Title    string `json:"title"`
 	UserId   int    `json:"-"`
 	Content  string `json:"content"`
-	FilePath string `json:"-"`
+	FilePath string `json:"filePath"`
 }
 
 type UpdatePostRequest struct {
@@ -88,7 +88,7 @@ func (d *PostgresDatabase) GetPostById(id int) (*Post, error) {
 }
 
 func (d *PostgresDatabase) CreatePost(p NewPostRequest) (int, error) {
-	query := `INSERT INTO posts (title, user_id, content) VALUES($1,$2,$3) RETURNING id`
+	query := `INSERT INTO posts (title, user_id, content, logo_path) VALUES($1,$2,$3,$4) RETURNING id`
 	switch {
 	case p.Title == "":
 		return 0, errors.New("title missing")
@@ -98,7 +98,7 @@ func (d *PostgresDatabase) CreatePost(p NewPostRequest) (int, error) {
 		return 0, errors.New("invalid user id")
 	}
 	var postID int
-	err := d.db.QueryRow(query, p.Title, p.UserId, p.Content).Scan(&postID)
+	err := d.db.QueryRow(query, p.Title, p.UserId, p.Content, p.FilePath).Scan(&postID)
 	if err != nil {
 		return 0, err
 	}
