@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 
 	_ "github.com/lib/pq"
@@ -37,15 +38,24 @@ type PostgresDatabase struct {
 }
 
 func NewPostgresDatabase() (*PostgresDatabase, error) {
-	dbUser, dbPassword, dbName := os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME")
+	dbHost, dbPort, dbUser, dbPassword, dbName :=
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_NAME")
 
-	connStr := fmt.Sprintf("user=%s dbname=%s password=%s sslmode=disable", dbUser, dbName, dbPassword)
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
 	db, err := sql.Open("postgres", connStr)
+
 	if err != nil {
+		log.Printf("Error opening database connection: %v\n", err)
 		return nil, err
 	}
+	fmt.Println("success")
 	// Ping the db to ensure connection
 	if err := db.Ping(); err != nil {
+		log.Printf("Error pinging database: %v\n", err)
 		return nil, err
 	}
 
