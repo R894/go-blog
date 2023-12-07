@@ -24,7 +24,7 @@ func NewServer(listenAddr string, logger *slog.Logger, db models.Database) inter
 
 func (s *Server) Start() error {
 	s.logger.Info("Server started", "Port", s.listenAddr)
-	return http.ListenAndServe("localhost:"+s.listenAddr, s.routes())
+	return http.ListenAndServe("0.0.0.0:"+s.listenAddr, s.routes())
 }
 
 func (s *Server) GetDB() models.Database {
