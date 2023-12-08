@@ -45,6 +45,7 @@ func NewPostgresDatabase() (*PostgresDatabase, error) {
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME")
 
+	fmt.Printf("Connecting to DB with parameters:\nhost=%s port=%s user=%s password=%s dbname=%s\n", dbHost, dbPort, dbUser, dbPassword, dbName)
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
 	db, err := sql.Open("postgres", connStr)
 
