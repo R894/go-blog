@@ -10,6 +10,8 @@ COPY . .
 
 RUN go build -o ./app/app
 
+VOLUME [ "/static" ]
+
 EXPOSE 4000
 
 CMD [ "./app/app" ]
