@@ -12,6 +12,7 @@ type Post struct {
 	UserId    int       `json:"userId"`
 	Content   string    `json:"content"`
 	FilePath  string    `json:"imagePath"`
+	Username  string    `json:"userName"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
@@ -64,6 +65,11 @@ func (d *PostgresDatabase) GetPosts(limit, offset int) ([]*Post, int, error) {
 		if err != nil {
 			return nil, 0, err
 		}
+		usr, err := d.GetUserById(post.UserId)
+		if err != nil {
+			return nil, 0, err
+		}
+		post.Username = usr.Username
 		posts = append(posts, post)
 	}
 	return posts, totalPages, nil
@@ -84,6 +90,11 @@ func (d *PostgresDatabase) GetPostById(id int) (*Post, error) {
 	if err != nil {
 		return nil, err
 	}
+	usr, err := d.GetUserById(post.UserId)
+	if err != nil {
+		return nil, err
+	}
+	post.Username = usr.Username
 	return post, nil
 }
 

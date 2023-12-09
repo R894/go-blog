@@ -89,7 +89,7 @@ func (d *PostgresDatabase) GetUserById(id int) (*User, error) {
 	query := `SELECT * FROM users WHERE id = $1`
 	row := d.db.QueryRow(query, id)
 
-	var user *User
+	user := new(User)
 	err := row.Scan(
 		&user.ID,
 		&user.Username,
