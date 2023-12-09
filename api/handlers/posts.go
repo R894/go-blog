@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -41,7 +40,6 @@ func (s *Handlers) CreatePost(w http.ResponseWriter, r *http.Request) {
 	// decode JSON request and put it into newPost
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&newPost); err != nil {
-		fmt.Println(err)
 		s.server.ClientError(w, http.StatusBadRequest)
 		return
 	}
@@ -63,7 +61,6 @@ func (s *Handlers) CreatePost(w http.ResponseWriter, r *http.Request) {
 	id, err := s.server.GetDB().CreatePost(newPost)
 
 	if err != nil {
-		fmt.Println(err)
 		s.server.ClientError(w, http.StatusBadRequest)
 		return
 	}
@@ -82,7 +79,6 @@ func (s *Handlers) ViewPosts(w http.ResponseWriter, r *http.Request) {
 	if offset < 0 {
 		offset = 0
 	}
-	fmt.Println(offset)
 
 	posts, totalPages, err := s.server.GetDB().GetPosts(6, offset)
 	if err != nil {
